@@ -1,0 +1,1 @@
+# industrial_maintenance_platform
