@@ -102,4 +102,28 @@ public class Machine
     {
         return status;
     }
+
+    public void updateDetails(
+        String name,
+        String manufacturer,
+        String model,
+        LocalDate installationDate,
+        String location) 
+    {
+        this.name = name;
+        this.manufacturer = manufacturer;
+        this.model = model;
+        this.installationDate = installationDate;
+        this.location = location;
+    }
+
+    public void changeStatus(MachineStatus newStatus) 
+    {
+        if (this.status == MachineStatus.DECOMMISSIONED) 
+        {
+            throw new IllegalStateException("Decommissioned machine status cannot be changed");
+        }
+
+        this.status = newStatus;
+    }
 }
