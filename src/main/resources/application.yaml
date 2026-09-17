@@ -1,3 +1,12 @@
 spring:
-  application:
-    name: industrial-maintenance-platform
+  datasource:
+    url: jdbc:postgresql://localhost:5433/industrial_maintenance
+    username: maintenance
+    password: maintenance
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true

@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: industrial-maintenance-postgres
+
+    environment:
+      POSTGRES_DB: industrial_maintenance
+      POSTGRES_USER: maintenance
+      POSTGRES_PASSWORD: maintenance
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
