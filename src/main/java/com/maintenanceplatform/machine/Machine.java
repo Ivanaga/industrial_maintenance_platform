@@ -1,5 +1,9 @@
 package com.maintenanceplatform.machine;
 
+// Exceptions
+import com.maintenanceplatform.machine.exception.InvalidMachineStatusTransitionException;
+
+// Jakarta primitives
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+// Java primitives
 import java.time.LocalDate;
 
 @Entity
@@ -119,9 +124,9 @@ public class Machine
 
     public void changeStatus(MachineStatus newStatus) 
     {
-        if (this.status == MachineStatus.DECOMMISSIONED) 
+        if (!status.canTransitionTo(newStatus)) 
         {
-            throw new IllegalStateException("Decommissioned machine status cannot be changed");
+            throw new InvalidMachineStatusTransitionException(status, newStatus);
         }
 
         this.status = newStatus;
