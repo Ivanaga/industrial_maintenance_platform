@@ -4,6 +4,7 @@ import com.maintenanceplatform.machine.Machine;
 import com.maintenanceplatform.machine.MachineRepository;
 import com.maintenanceplatform.machine.exception.MachineNotFoundException;
 import org.springframework.stereotype.Service;
+import com.maintenanceplatform.sensor.exception.SensorNotFoundException;
 
 import java.util.List;
 
@@ -32,5 +33,10 @@ public class SensorService
     public List<Sensor> getAllSensors() 
     {
         return sensorRepository.findAll();
+    }
+
+    public Sensor getSensorById(Long id) 
+    {
+        return sensorRepository.findById(id).orElseThrow(() -> new SensorNotFoundException(id));
     }
 }

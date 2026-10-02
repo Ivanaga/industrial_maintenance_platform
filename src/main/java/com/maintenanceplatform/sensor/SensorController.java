@@ -34,4 +34,9 @@ public class SensorController
     {
         return sensorService.getAllSensors().stream().map(SensorResponse::from).toList();
     }
+    @GetMapping("/{id}")
+    public SensorResponse getSensorById(@PathVariable Long id) 
+    {
+        return SensorResponse.from(sensorService.getSensorById(id));
+    }
 }
