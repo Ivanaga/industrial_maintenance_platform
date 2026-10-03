@@ -4,6 +4,7 @@ package com.maintenanceplatform.common.exception;
 import com.maintenanceplatform.machine.exception.DuplicateSerialNumberException;
 import com.maintenanceplatform.machine.exception.MachineNotFoundException;
 import com.maintenanceplatform.machine.exception.InvalidMachineStatusTransitionException;
+import com.maintenanceplatform.sensorreading.exception.InvalidTimeRangeException;
 
 // Spring primitives
 import org.springframework.http.HttpStatus;
@@ -41,5 +42,11 @@ public class GlobalExceptionHandler
     public ResponseEntity<Map<String, String>> handleSensorNotFound(SensorNotFoundException exception) 
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", exception.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidTimeRangeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidTimeRange(InvalidTimeRangeException exception)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", exception.getMessage()));
     }
 }
