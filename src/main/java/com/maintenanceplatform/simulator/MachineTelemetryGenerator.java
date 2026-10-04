@@ -16,13 +16,13 @@ public class MachineTelemetryGenerator
     // for every simulated sensor.
     public Map<Long, Double> generateTick(MachineSimulation machine) 
     {
-        machine.advanceState();
-
+        machine.updateLoadLevel();
+        machine.updateDegradation();
         Map<Long, Double> readings = new HashMap<>();
 
         for (SensorSimulation sensor : machine.getSensors()) 
         {
-            double value = telemetryGenerator.generateNextValue(sensor, machine.getOperatingMode());
+            double value = telemetryGenerator.generateNextValue(sensor, machine.getLoadLevel(), machine.getHealthState());
 
             readings.put(sensor.getSensorId(), value);
         }

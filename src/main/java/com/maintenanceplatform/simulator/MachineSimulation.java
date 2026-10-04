@@ -1,24 +1,25 @@
 package com.maintenanceplatform.simulator;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 // Generates one telemetry tick for all sensors of a simulated machine.
 public class MachineSimulation 
 {
     private final Long machineId;
-    private OperatingMode operatingMode;
+    private LoadLevel loadLevel;
     private final List<SensorSimulation> sensors;
     private double degradationLevel;
-    private int highLoadTicksRemaining;
+    private LoadControlMode loadControlMode;
 
     public MachineSimulation(Long machineId, List<SensorSimulation> sensors)
     {
         this.machineId = machineId;
         this.sensors = sensors;
-        this.operatingMode = OperatingMode.NORMAL;
+        this.loadLevel = LoadLevel.NORMAL;
         this.degradationLevel = 0.0;
-        this.highLoadTicksRemaining = 0;
+        this.loadControlMode = LoadControlMode.AUTOMATIC;
     }
 
     public Long getMachineId() 
@@ -26,102 +27,138 @@ public class MachineSimulation
         return machineId;
     }
 
-    public OperatingMode getOperatingMode() 
-    {
-        return operatingMode;
-    }
-
     public double getDegradationLevel() 
     {
         return degradationLevel;
     }
 
-    public void setOperatingMode(OperatingMode operatingMode) 
+    public LoadLevel getLoadLevel() 
     {
-        this.operatingMode = operatingMode;
+        return loadLevel;
+    }
+
+    public LoadControlMode getLoadControlMode() 
+    {
+        return loadControlMode;
+    }
+
+    public void setLoadControlMode(LoadControlMode loadControlMode) 
+    {
+        this.loadControlMode = loadControlMode;
+    }
+
+    public void setLoadLevel(LoadLevel loadLevel) 
+    {
+        this.loadLevel = loadLevel;
     }
 
     public List<SensorSimulation> getSensors() 
     {
         return sensors;
     }
-    public void advanceState() 
-    {
-        increaseDegradation();
 
+    public HealthState getHealthState() 
+    {
         if (degradationLevel >= 0.95) 
         {
-            operatingMode = OperatingMode.FAILURE;
-            return;
+            return HealthState.FAILURE;
         }
 
         if (degradationLevel >= 0.60) 
         {
-            operatingMode = OperatingMode.DEGRADING;
+            return HealthState.DEGRADING;
+        }
+
+        return HealthState.HEALTHY;
+    }
+
+    public void updateLoadLevel() 
+    {
+        if (loadControlMode == LoadControlMode.MANUAL) 
+        {
             return;
         }
 
-        if (operatingMode == OperatingMode.HIGH_LOAD) 
-        {
-            highLoadTicksRemaining--;
+        updateAutomaticLoad();
+    }
 
-            if (highLoadTicksRemaining <= 0) 
+    private void updateAutomaticLoad() 
+    {
+        double random = Math.random();
+
+        switch (loadLevel) 
+        {
+            case LOW -> 
             {
-                operatingMode = OperatingMode.NORMAL;
+                if (random < 0.25) 
+                {
+                    loadLevel = LoadLevel.NORMAL;
+                }
             }
 
-            return;
+            case NORMAL -> 
+            {
+                if (random < 0.10) 
+                {
+                    loadLevel = LoadLevel.LOW;
+                } 
+                else if (random < 0.25) 
+                {
+                    loadLevel = LoadLevel.MEDIUM;
+                }
+            }
+
+            case MEDIUM -> 
+            {
+                if (random < 0.15) 
+                {
+                    loadLevel = LoadLevel.NORMAL;
+                } 
+                else if (random < 0.30) 
+                {
+                    loadLevel = LoadLevel.HIGH;
+                }
+            }
+
+            case HIGH -> 
+            {
+                if (random < 0.20) 
+                    {
+                    loadLevel = LoadLevel.MEDIUM;
+                } 
+                else if (random < 0.25) 
+                {
+                    loadLevel = LoadLevel.OVERLOAD;
+                }
+            }
+
+            case OVERLOAD -> 
+            {
+                if (random < 0.40) 
+                {
+                    loadLevel = LoadLevel.HIGH;
+                }
+            }
         }
-
-
-        
-        maybeEnterHighLoad();
     }
 
-    private void increaseDegradation() 
+    // Increases machine degradation based on current load
+    // with a small random wear component.
+    public void updateDegradation() 
     {
-        if (operatingMode == OperatingMode.HIGH_LOAD) 
+        double baseWear = switch (loadLevel) 
         {
-            degradationLevel += 0.01;
-        } 
-        else 
-        {
-            degradationLevel += 0.002;
-        }
+            case LOW -> 0.0005;
+            case NORMAL -> 0.0010;
+            case MEDIUM -> 0.0015;
+            case HIGH -> 0.0030;
+            case OVERLOAD -> 0.0070;
+        };
+
+        double randomWear = ThreadLocalRandom.current().nextDouble(0.0, 0.0005);
+
+        degradationLevel += baseWear + randomWear;
 
         degradationLevel = Math.min(degradationLevel, 1.0);
-    }
-
-    private void maybeEnterHighLoad() 
-    {
-        double probability = Math.random();
-
-        if (probability < 0.05) 
-        {
-            operatingMode = OperatingMode.HIGH_LOAD;
-            highLoadTicksRemaining = 5;
-        }
-    }
-
-    public void forceHighLoad(int durationTicks) 
-    {
-        if (operatingMode == OperatingMode.FAILURE) 
-        {
-            return;
-        }
-
-        operatingMode = OperatingMode.HIGH_LOAD;
-        highLoadTicksRemaining = durationTicks;
-    }
-
-    public void forceNormalMode() 
-    {
-        if (operatingMode == OperatingMode.FAILURE) 
-        {
-            return;
-        }
-
-        operatingMode = OperatingMode.NORMAL;
-        highLoadTicksRemaining = 0;
     }
 }

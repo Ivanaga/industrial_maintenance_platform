@@ -8,15 +8,16 @@ import java.util.concurrent.ThreadLocalRandom;
 // the previous value, random noise and an operating-mode-dependent trend.
 public class TelemetryGenerator 
 {
-    public double generateNextValue(SensorSimulation sensor, OperatingMode operatingMode)
+    public double generateNextValue(SensorSimulation sensor, LoadLevel loadLevel, HealthState healthState)
     {
         double currentValue = sensor.getCurrentValue();
 
         double noise = generateNoise(sensor.getType());
-        double trend = generateTrend(sensor.getType(), operatingMode);
+        double loadEffect = generateLoadEffect(sensor.getType(), loadLevel);
+        double healthEffect = generateHealthEffect(sensor.getType(), healthState);
         double meanReversion = generateMeanReversion(sensor);
 
-        double nextValue = currentValue + noise + trend + meanReversion;
+        double nextValue = currentValue + noise + loadEffect + healthEffect + meanReversion;
 
         sensor.setCurrentValue(nextValue);
 
@@ -38,35 +39,70 @@ public class TelemetryGenerator
         };
     }
 
-    private double generateTrend(SensorType type, OperatingMode operatingMode) 
+    private double generateLoadEffect(SensorType type, LoadLevel loadLevel)
     {
-        return switch (operatingMode) 
+        return switch (loadLevel) 
         {
-            case NORMAL -> 0.0;
-            case HIGH_LOAD -> switch (type) 
+            case LOW -> switch (type) 
             {
-                case TEMPERATURE -> 0.08;
-                case VIBRATION -> 0.01;
-                case CURRENT -> 0.05;
-                case LOAD -> 0.1;
+                case TEMPERATURE -> -0.03;
+                case CURRENT -> -0.05;
+                case LOAD -> -0.10;
                 default -> 0.0;
             };
 
+            case NORMAL -> 0.0;
+
+            case MEDIUM -> switch (type) 
+            {
+                case TEMPERATURE -> 0.03;
+                case CURRENT -> 0.03;
+                case LOAD -> 0.05;
+                default -> 0.0;
+            };
+
+            case HIGH -> switch (type) 
+            {
+                case TEMPERATURE -> 0.08;
+                case VIBRATION -> 0.01;
+                case CURRENT -> 0.06;
+                case LOAD -> 0.10;
+                default -> 0.0;
+            };
+
+            case OVERLOAD -> switch (type) 
+            {
+                case TEMPERATURE -> 0.20;
+                case VIBRATION -> 0.04;
+                case CURRENT -> 0.15;
+                case LOAD -> 0.25;
+                case ACOUSTIC -> 0.05;
+                default -> 0.0;
+            };
+        };
+    }
+
+    private double generateHealthEffect(SensorType type, HealthState healthState) 
+    {
+        return switch (healthState) 
+        {
+            case HEALTHY -> 0.0;
+
             case DEGRADING -> switch (type) 
             {
-                case TEMPERATURE -> 0.12;
+                case TEMPERATURE -> 0.10;
                 case VIBRATION -> 0.03;
-                case CURRENT -> 0.03;
+                case CURRENT -> 0.02;
                 case ACOUSTIC -> 0.05;
                 default -> 0.0;
             };
 
             case FAILURE -> switch (type) 
             {
-                case TEMPERATURE -> 0.5;
-                case VIBRATION -> 0.2;
+                case TEMPERATURE -> 0.50;
+                case VIBRATION -> 0.20;
                 case CURRENT -> 0.15;
-                case ACOUSTIC -> 0.3;
+                case ACOUSTIC -> 0.30;
                 default -> 0.0;
             };
         };
