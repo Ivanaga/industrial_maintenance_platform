@@ -43,3 +43,22 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+
+#FRONTEND INFO (DELETE AFTER SEPARATION)
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
