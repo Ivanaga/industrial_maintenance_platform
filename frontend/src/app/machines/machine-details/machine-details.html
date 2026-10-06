@@ -1,0 +1,21 @@
+@if (machine(); as machine) 
+{
+  <h2>{{ machine.name }}</h2>
+
+  <p>Serial number: {{ machine.serialNumber }}</p>
+  <p>Manufacturer: {{ machine.manufacturer }}</p>
+  <p>Model: {{ machine.model }}</p>
+  <p>Location: {{ machine.location }}</p>
+  <p>Status: {{ machine.status }}</p>
+
+  <h3>Sensors</h3>
+
+  @for (sensor of sensors(); track sensor.id) 
+  {
+    <div>
+      <strong>{{ sensor.name }}</strong>
+      <span> — {{ sensor.type }}</span>
+      <span> — {{ sensor.unit }}</span>
+    </div>
+  }
+}

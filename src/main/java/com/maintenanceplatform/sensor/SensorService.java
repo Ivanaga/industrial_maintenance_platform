@@ -39,4 +39,10 @@ public class SensorService
     {
         return sensorRepository.findById(id).orElseThrow(() -> new SensorNotFoundException(id));
     }
+
+    // For frontend
+    public List<Sensor> getSensorsByMachineId(Long machineId) 
+    {
+        return sensorRepository.findByMachineId(machineId);
+    }
 }

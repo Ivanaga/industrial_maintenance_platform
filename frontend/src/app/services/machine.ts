@@ -15,4 +15,9 @@ export class MachineService
   {
     return this.http.get<Machine[]>(this.apiUrl);
   }
+
+  getMachineById(id: number): Observable<Machine> 
+  {
+    return this.http.get<Machine>(`${this.apiUrl}/${id}`);
+  }
 }

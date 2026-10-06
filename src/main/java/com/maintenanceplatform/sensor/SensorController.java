@@ -39,4 +39,11 @@ public class SensorController
     {
         return SensorResponse.from(sensorService.getSensorById(id));
     }
+
+    // For frontend
+    @GetMapping("/machine/{machineId}")
+    public List<SensorResponse> getSensorsByMachineId(@PathVariable Long machineId) 
+    {
+        return sensorService.getSensorsByMachineId(machineId).stream().map(SensorResponse::from).toList();
+    }
 }

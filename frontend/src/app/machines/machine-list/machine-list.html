@@ -1,0 +1,20 @@
+<h2>Machines</h2>
+
+@for (machine of machines(); track machine.id) 
+{
+  <div class="machine-card">
+
+    <h3>
+      <a [routerLink]="['/machines', machine.id]">
+        {{ machine.name }}
+      </a>
+    </h3>
+
+    <p>Serial number: {{ machine.serialNumber }}</p>
+    <p>Manufacturer: {{ machine.manufacturer }}</p>
+    <p>Model: {{ machine.model }}</p>
+    <p>Location: {{ machine.location }}</p>
+    <p>Status: {{ machine.status }}</p>
+
+  </div>
+}

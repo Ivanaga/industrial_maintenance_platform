@@ -1,26 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-import { Machine } from './models/machine';
-import { MachineService } from './services/machine';
-
-@Component({
+@Component(
+{
   selector: 'app-root',
-  imports: [],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit 
+export class App 
 {
-  private readonly machineService = inject(MachineService);
-
-  machines = signal<Machine[]>([]);
-
-  ngOnInit(): void 
-  {
-    this.machineService.getMachines().subscribe(
-    {
-      next: (machines) => {this.machines.set(machines);},
-      error: (error) => {console.error('Failed to load machines', error);}
-    });
-  }
 }
