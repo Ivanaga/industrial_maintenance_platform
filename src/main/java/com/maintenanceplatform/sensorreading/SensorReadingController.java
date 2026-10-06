@@ -40,4 +40,11 @@ public class SensorReadingController
     {
         return sensorReadingService.getReadingsBySensorId(sensorId, from, to).stream().map(SensorReadingResponse::from).toList();
     }
+    @GetMapping("/sensor/{sensorId}/latest")
+    public SensorReadingResponse getLatestReading(@PathVariable Long sensorId) 
+    {
+        SensorReading reading = sensorReadingService.getLatestReadingBySensorId(sensorId);
+
+        return SensorReadingResponse.from(reading);
+    }
 }

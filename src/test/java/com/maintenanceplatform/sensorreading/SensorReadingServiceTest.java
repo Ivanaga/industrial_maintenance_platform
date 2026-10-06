@@ -1,16 +1,20 @@
 package com.maintenanceplatform.sensorreading;
 
 import com.maintenanceplatform.sensor.SensorRepository;
+import com.maintenanceplatform.sensorreading.SensorReading;
 import com.maintenanceplatform.sensor.exception.SensorNotFoundException;
 import com.maintenanceplatform.sensorreading.exception.InvalidTimeRangeException;
+import com.maintenanceplatform.sensorreading.exception.SensorReadingNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
 
 class SensorReadingServiceTest 
@@ -89,5 +93,51 @@ class SensorReadingServiceTest
         assertThrows(SensorNotFoundException.class, () -> sensorReadingService.getReadingsBySensorId(999L, null, null));
 
         verify(sensorReadingRepository, never()).findBySensorIdOrderByTimestampAsc(anyLong());
+    }
+
+    // Testing Service layer for new frontend function
+    @Test
+    void shouldGetLatestReadingBySensorId()
+    {
+        Long sensorId = 1L;
+
+        when(sensorRepository.existsById(sensorId)).thenReturn(true);
+
+        when(sensorReadingRepository.findTopBySensorIdOrderByTimestampDesc(sensorId)).thenReturn(Optional.of(mock(SensorReading.class)));
+
+        sensorReadingService.getLatestReadingBySensorId(sensorId);
+
+        verify(sensorRepository).existsById(sensorId);
+        verify(sensorReadingRepository).findTopBySensorIdOrderByTimestampDesc(sensorId);
+    }
+
+    @Test
+    void shouldThrowWhenGettingLatestReadingForNonExistingSensor()
+    {
+        Long sensorId = 999L;
+
+        when(sensorRepository.existsById(sensorId)).thenReturn(false);
+
+        assertThrows(SensorNotFoundException.class, () -> sensorReadingService.getLatestReadingBySensorId(sensorId));
+
+        verify(sensorRepository).existsById(sensorId);
+
+        verify(sensorReadingRepository, never()).findTopBySensorIdOrderByTimestampDesc(anyLong());
+    }
+
+    @Test
+    void shouldThrowWhenSensorHasNoReadings()
+    {
+        Long sensorId = 1L;
+
+        when(sensorRepository.existsById(sensorId)).thenReturn(true);
+
+        when(sensorReadingRepository.findTopBySensorIdOrderByTimestampDesc(sensorId)).thenReturn(Optional.empty());
+
+        assertThrows(SensorReadingNotFoundException.class, () -> sensorReadingService.getLatestReadingBySensorId(sensorId));
+
+        verify(sensorRepository).existsById(sensorId);
+
+        verify(sensorReadingRepository).findTopBySensorIdOrderByTimestampDesc(sensorId);
     }
 }

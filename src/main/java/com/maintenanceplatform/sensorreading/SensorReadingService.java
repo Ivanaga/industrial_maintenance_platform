@@ -5,6 +5,7 @@ import com.maintenanceplatform.sensor.SensorRepository;
 import com.maintenanceplatform.sensor.exception.SensorNotFoundException;
 import org.springframework.stereotype.Service;
 import com.maintenanceplatform.sensorreading.exception.InvalidTimeRangeException;
+import com.maintenanceplatform.sensorreading.exception.SensorReadingNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
@@ -65,5 +66,16 @@ public class SensorReadingService
         }
 
         return sensorReadingRepository.findBySensorIdOrderByTimestampAsc(sensorId);
+    }
+    public SensorReading getLatestReadingBySensorId(Long sensorId) 
+    {
+        if (!sensorRepository.existsById(sensorId)) 
+        {
+            throw new SensorNotFoundException(sensorId);
+        }
+        
+        SensorReading reading = sensorReadingRepository.findTopBySensorIdOrderByTimestampDesc(sensorId).orElseThrow(() -> new SensorReadingNotFoundException(sensorId));
+
+        return reading;
     }
 }

@@ -1,5 +1,9 @@
 package com.maintenanceplatform.sensorreading;
 
+import com.maintenanceplatform.sensorreading.exception.SensorReadingNotFoundException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import com.maintenanceplatform.sensor.Sensor;
 import com.maintenanceplatform.sensor.SensorType;
 import com.maintenanceplatform.sensor.exception.SensorNotFoundException;
@@ -67,5 +71,56 @@ class SensorReadingControllerTest
         when(sensorReadingService.getReadingsBySensorId(999L, null, null)).thenThrow(new SensorNotFoundException(999L));
 
         mockMvc.perform(get("/api/sensor-readings/sensor/999")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldGetLatestReadingBySensorId() throws Exception
+    {
+        Long sensorId = 1L;
+
+        Sensor sensor = mock(Sensor.class);
+        SensorReading reading = mock(SensorReading.class);
+
+        when(sensor.getId()).thenReturn(sensorId);
+
+        when(reading.getId()).thenReturn(10L);
+        when(reading.getSensor()).thenReturn(sensor);
+        when(reading.getValue()).thenReturn(72.5);
+        when(reading.getTimestamp()).thenReturn(Instant.parse("2026-10-03T09:30:00Z"));
+
+        when(sensorReadingService.getLatestReadingBySensorId(sensorId)).thenReturn(reading);
+
+        mockMvc.perform(get("/api/sensor-readings/sensor/{sensorId}/latest", sensorId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(10))
+        .andExpect(jsonPath("$.sensorId").value(1))
+        .andExpect(jsonPath("$.value").value(72.5))
+        .andExpect(jsonPath("$.timestamp").value("2026-10-03T09:30:00Z"));
+
+        verify(sensorReadingService).getLatestReadingBySensorId(sensorId);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenGettingLatestReadingForNonExistingSensor() throws Exception
+    {
+        Long sensorId = 999L;
+
+        when(sensorReadingService.getLatestReadingBySensorId(sensorId)).thenThrow(new SensorNotFoundException(sensorId));
+
+        mockMvc.perform(get("/api/sensor-readings/sensor/{sensorId}/latest", sensorId)).andExpect(status().isNotFound());
+
+        verify(sensorReadingService).getLatestReadingBySensorId(sensorId);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenSensorHasNoReadings() throws Exception
+    {
+        Long sensorId = 1L;
+
+        when(sensorReadingService.getLatestReadingBySensorId(sensorId)).thenThrow(new SensorReadingNotFoundException(sensorId));
+
+        mockMvc.perform(get("/api/sensor-readings/sensor/{sensorId}/latest", sensorId)).andExpect(status().isNotFound());
+
+        verify(sensorReadingService).getLatestReadingBySensorId(sensorId);
     }
 }
