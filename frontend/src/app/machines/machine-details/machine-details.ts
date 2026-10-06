@@ -10,10 +10,12 @@ import { MachineService } from '../../services/machine';
 import { SensorReading } from '../../models/sensor-reading';
 import { SensorReadingService } from '../../services/sensor-reading';
 
+import { SensorHistoryChart } from '../../sensor-readings/sensor-history-chart/sensor-history-chart';
+
 @Component(
 {
   selector: 'app-machine-details',
-  imports: [],
+  imports: [SensorHistoryChart],
   templateUrl: './machine-details.html',
   styleUrl: './machine-details.scss'
 })
@@ -27,6 +29,10 @@ export class MachineDetails implements OnInit
   sensors = signal<Sensor[]>([]);
 
   machine = signal<Machine | null>(null);
+
+  selectedSensor = signal<Sensor | null>(null);
+
+  sensorHistory = signal<SensorReading[]>([]);
 
   latestReadings = signal<Map<number, SensorReading>>(new Map());
 
@@ -48,9 +54,37 @@ export class MachineDetails implements OnInit
         {
           this.loadLatestReading(sensor.id);
         }
+      
+      const firstSensor = sensors[0];
+
+      if (firstSensor) 
+      {
+        this.sensorReadingService.getReadingsBySensorId(firstSensor.id).subscribe(
+          {
+            next: (readings) => 
+            {
+              console.log('Sensor history:', readings);
+            },
+            error: (error) =>
+            {
+              console.error('Failed to load sensor history', error);
+            }
+          });
+      }
       },
       error: (error) => {console.error('Failed to load sensors', error);}
     });
+  }
+
+  selectSensor(sensor: Sensor): void 
+  {
+    this.selectedSensor.set(sensor);
+
+    this.sensorReadingService.getReadingsBySensorId(sensor.id).subscribe(
+      {
+        next: (readings) => { this.sensorHistory.set(readings);},
+        error: (error) => { console.error(`Failed to load history for sensor ${sensor.id}`, error);}
+      });
   }
 
   private loadLatestReading(sensorId: number): void 

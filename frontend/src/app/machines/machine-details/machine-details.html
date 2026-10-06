@@ -12,7 +12,7 @@
 
   @for (sensor of sensors(); track sensor.id) 
   {
-    <div>
+    <div (click)="selectSensor(sensor)">
       <strong>{{ sensor.name }}</strong>
       <span> — {{ sensor.type }}</span>
       @if (latestReadings().get(sensor.id); as reading) 
@@ -28,4 +28,13 @@
       }
     </div>
   }
+  @if (selectedSensor(); as sensor) 
+  {
+    <h3>Selected sensor: {{ sensor.name }}</h3>
+
+    <app-sensor-history-chart
+      [readings]="sensorHistory()">
+    </app-sensor-history-chart>
+  }
+
 }

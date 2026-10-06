@@ -17,4 +17,29 @@ export class SensorReadingService
     {
         return this.http.get<SensorReading>(`${this.apiUrl}/sensor/${sensorId}/latest`);
     }
+    getReadingsBySensorId(sensorId: number, from?: string, to?: string): Observable<SensorReading[]> 
+    {
+        let url = `${this.apiUrl}/sensor/${sensorId}`;
+
+        const params = new URLSearchParams();
+
+        if (from) 
+        {
+            params.set('from', from);
+        }
+
+        if (to) 
+        {
+            params.set('to', to);
+        }
+
+        const query = params.toString();
+
+        if (query) 
+        {
+            url += `?${query}`;
+        }
+
+        return this.http.get<SensorReading[]>(url);
+    }
 }
