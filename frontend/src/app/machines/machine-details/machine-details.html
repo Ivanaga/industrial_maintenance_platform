@@ -15,7 +15,17 @@
     <div>
       <strong>{{ sensor.name }}</strong>
       <span> — {{ sensor.type }}</span>
-      <span> — {{ sensor.unit }}</span>
+      @if (latestReadings().get(sensor.id); as reading) 
+      {
+        <span>
+          — {{ reading.value }} {{ sensor.unit }}
+        </span>
+      } @else 
+      {
+        <span>
+          — No data
+        </span>
+      }
     </div>
   }
 }
