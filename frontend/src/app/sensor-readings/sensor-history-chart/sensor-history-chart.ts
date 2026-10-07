@@ -15,35 +15,53 @@ export class SensorHistoryChart
 {
   readings = input.required<SensorReading[]>();
 
+  sensorName = input.required<string>();
+  unit = input.required<string>();
+
   chartOptions = computed<EChartsOption>(() => 
   {
     const readings = this.readings();
 
     return {
+      title: 
+      {
+        text: this.sensorName()
+      },
+
       tooltip: 
       {
-        trigger: 'axis'
+        trigger: 'axis',
+        valueFormatter: (value) => `${value} ${this.unit()}`
       },
 
       xAxis: 
       {
-        type: 'time'
+        type: 'time',
+        name: 'Time'
       },
 
       yAxis: 
       {
-        type: 'value'
+        type: 'value',
+        name: this.unit()
       },
+
+      dataZoom: 
+      [
+        {
+          type: 'inside'
+        },
+        {
+          type: 'slider'
+        }
+      ],
 
       series: 
       [
         {
           type: 'line',
-          data: readings.map(reading => 
-          [
-            reading.timestamp,
-            reading.value
-          ])
+          showSymbol: false,
+          data: readings.map(reading => [reading.timestamp, reading.value])
         }
       ]
     };

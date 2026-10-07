@@ -31,10 +31,19 @@
   @if (selectedSensor(); as sensor) 
   {
     <h3>Selected sensor: {{ sensor.name }}</h3>
+     <div>
+      <button (click)="selectRange('1h')">1h</button>
+      <button (click)="selectRange('6h')">6h</button>
+      <button (click)="selectRange('24h')">24h</button>
+      <button (click)="selectRange('all')">All</button>
+    </div>
+
 
     <app-sensor-history-chart
-      [readings]="sensorHistory()">
-    </app-sensor-history-chart>
+      [readings]="sensorHistory()"
+      [sensorName]="sensor.name"
+      [unit]="sensor.unit">
+  </app-sensor-history-chart>
   }
 
 }

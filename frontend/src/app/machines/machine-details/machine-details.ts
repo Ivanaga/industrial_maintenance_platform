@@ -36,6 +36,8 @@ export class MachineDetails implements OnInit
 
   latestReadings = signal<Map<number, SensorReading>>(new Map());
 
+  selectedRange = signal<'1h' | '6h' | '24h' | 'all'>('all');
+
   ngOnInit(): void 
   {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -107,5 +109,59 @@ export class MachineDetails implements OnInit
           console.error(`Failed to load latest reading for sensor ${sensorId}`, error);
         }
       });
+  }
+
+  selectRange(range: '1h' | '6h' | '24h' | 'all'): void
+  {
+    this.selectedRange.set(range);
+    const sensor = this.selectedSensor();
+
+    if (sensor === null) 
+    {
+      return;
+    }
+
+    if (range === 'all') 
+    {
+      this.sensorReadingService.getReadingsBySensorId(sensor.id).subscribe(
+        {
+          next : (sensorReadings) => {this.sensorHistory.set(sensorReadings)},
+          error: (error) => 
+          {
+            console.error(`Failed to load all sensor readings for sensor ${sensor.id} id`, error);
+          }
+        }
+      ) 
+      return;
+    }
+
+    let hours : number;
+
+    switch (range) 
+    {
+      case '1h':
+        hours = 1;
+        break;
+
+      case '6h':
+        hours = 6;
+        break;
+
+      case '24h':
+        hours = 24;
+        break;
+    }
+      const to = new Date();
+      const from = new Date(to.getTime() - (hours * 60 * 60 * 1000));
+      
+      this.sensorReadingService.getReadingsBySensorId(sensor.id, from.toISOString(), to.toISOString()).subscribe(
+        {
+          next : (sensorReadings) => {this.sensorHistory.set(sensorReadings)},
+          error: (error) => 
+          {
+            console.error(`Failed to load sensor reading for ${range} timestamp for sensor ${sensor.id}id `, error);
+          }
+        }
+      );
   }
 }

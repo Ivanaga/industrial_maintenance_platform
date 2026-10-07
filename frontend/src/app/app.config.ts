@@ -4,6 +4,7 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 
 import { provideEchartsCore } from 'ngx-echarts';
+import { TitleComponent } from 'echarts/components';
 
 import * as echarts from 'echarts/core';
 import { LineChart } from 'echarts/charts';
@@ -20,6 +21,7 @@ echarts.use(
   GridComponent,
   TooltipComponent,
   DataZoomComponent,
+  TitleComponent,
   CanvasRenderer
 ]);
 export const appConfig: ApplicationConfig = {
